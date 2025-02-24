@@ -42,7 +42,6 @@ alias ghe="gh copilot explain"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 
-source ~/.gh-completion.zsh
 
 
 alias gacp='gitAddCommitPush'
@@ -53,6 +52,16 @@ function gitAddCommitPush() {
     git commit -m "$commitMessage"
     git push
 }
+
+
+# Función para abrir un archivo seleccionado con nvim directamente (Ctrl+n)
+fzf_nvim_file() {
+    local file
+    file=$(find . -type f | fzf) || return
+    nvim "$file" < /dev/tty
+}
+zle -N fzf_nvim_file
+bindkey '^n' fzf_nvim_file
 
 
 
@@ -66,21 +75,6 @@ export NVM_DIR="$HOME/.nvm"
 export BAT_THEME=tokyonight_night
 
 
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/klaus/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/klaus/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/klaus/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/klaus/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
 
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
