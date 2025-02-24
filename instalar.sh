@@ -102,33 +102,61 @@ APPS() {
     echo "#------------------------ Instalar apps complementarias -----------------------#"
     sudo apt install xsel neofetch cmatrix flameshot gnome-terminal ranger xbacklight gpick light cava nautilus htop feh dmenu nm-tray xfconf xsettingsd xfce4-power-manager zenity git ttf-mscorefonts-installer bat -y || log_error "Instalación de apps complementarias falló"
     sudo systemctl disable mpd || log_error "No se pudo deshabilitar mpd"
+
     # Instalar JetBrains Mono Font
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/JetBrains/JetBrainsMono/master/install_manual.sh)" || log_error "Instalación de JetBrains Mono falló"
+
     # Instalar vim-plug para NVIM
-    sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-            https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' || log_error "Instalación de vim-plug falló"
+    # sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+    #        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' || log_error "Instalación de vim-plug falló"
+
     # Instalar LSD
     cargo install --git https://github.com/lsd-rs/lsd.git --branch master || log_error "Instalación de lsd falló"
+
     # Instalar FZF (si no existe)
     if [ ! -d "$HOME/.fzf" ]; then
         git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" || log_error "Clonación de fzf falló"
         "$HOME/.fzf/install" || log_error "Instalación de fzf falló"
     fi
+
     # Instalar Node (nvm)
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash || log_error "Instalación de nvm falló"
-    # Cargar nvm para la sesión actual
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install 20 || log_error "Instalación de Node 20 falló"
+
     # Instalar GH CLI
     if ! type -p curl >/dev/null; then
         sudo apt update && sudo apt install curl -y || log_error "Instalación de curl falló"
     fi
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null || log_error "Descarga del keyring falló"
-    sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg || log_error "chmod keyring falló"
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt update || log_error "apt update para GH CLI falló"
-    sudo apt install gh -y || log_error "Instalación de GH CLI falló"
+    #curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null || log_error "Descarga del keyring falló"
+    #sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg || log_error "chmod keyring falló"
+    #echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    #sudo apt update || log_error "apt update para GH CLI falló"
+    #sudo apt install gh -y || log_error "Instalación de GH CLI falló"
+
+    #---------------------- INSTALAR BRAVE ----------------------#
+    echo "#------------------------- Instalar Brave -------------------------#"
+    sudo apt install curl -y || log_error "Instalación de curl para Brave falló"
+    sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg || log_error "Descarga del keyring Brave falló"
+    echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list > /dev/null
+    sudo apt update || log_error "apt update para Brave falló"
+    sudo apt install brave-browser -y || log_error "Instalación de Brave falló"
+
+    #---------------------- INSTALAR RIPGREP ----------------------#
+    echo "#------------------------- Instalar ripgrep -------------------------#"
+    curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb || log_error "Descarga de ripgrep falló"
+    sudo dpkg -i ripgrep_14.1.0-1_amd64.deb || log_error "Instalación de ripgrep falló"
+
+    #---------------------- INSTALAR NEOVIM Y NVCHAD ----------------------#
+    echo "#------------------------- Instalar Neovim -------------------------#"
+    sudo apt install neovim -y || log_error "Instalación de Neovim falló"
+    echo "#------------------------- Instalar NVChad -------------------------#"
+    rm -rf "$HOME/.config/nvim" 2>/dev/null
+    git clone https://github.com/NvChad/starter "$HOME/.config/nvim" || log_error "Clonación de NVChad falló"
+    # Se inicializa Neovim en modo headless para que NVChad realice su configuración inicial
+    nvim --headless +PackerSync +qa || log_error "Inicialización de NVChad falló"
+
     sleep 2
 }
 
